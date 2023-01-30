@@ -1,0 +1,52 @@
+-- src/main/sqldelight/com/example/sqldelight/hockey/data/Player.sq
+
+CREATE TABLE highSchoolWithSatScores (
+  dbn TEXT PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL,
+  startTime TEXT,
+  subway TEXT NOT NULL,
+  totalStudents TEXT NOT NULL,
+  zipCode TEXT NOT NULL,
+  website TEXT NOT NULL,
+  mathSatAverageScore TEXT,
+  writingSatAverageScore TEXT,
+  readingSatAverageScore TEXT,
+  satTestTakerCount TEXT
+);
+
+CREATE INDEX schoolName ON highSchoolWithSatScores(name);
+
+selectAllSchools:
+    SELECT
+        dbn, name, startTime, subway, totalStudents, zipCode, website, mathSatAverageScore,
+         writingSatAverageScore, readingSatAverageScore, satTestTakerCount
+    FROM highSchoolWithSatScores;
+
+insert:
+-- The primary key value "id" is set automatically by SQLite
+INSERT INTO highSchoolWithSatScores(
+    dbn,
+    name,
+    startTime,
+    subway,
+    totalStudents,
+    zipCode,
+    website,
+    mathSatAverageScore,
+    writingSatAverageScore,
+    readingSatAverageScore,
+    satTestTakerCount
+)
+VALUES (
+?,
+?,
+?,
+?,
+?,
+?,
+?,
+?,
+?,
+?,
+?
+);

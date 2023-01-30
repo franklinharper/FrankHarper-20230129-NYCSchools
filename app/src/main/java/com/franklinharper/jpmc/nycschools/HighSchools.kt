@@ -1,1 +1,0 @@
-class HighSchools : ArrayList<HighSchoolsItem>()
