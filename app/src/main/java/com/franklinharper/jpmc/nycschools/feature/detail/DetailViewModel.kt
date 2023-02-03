@@ -1,11 +1,12 @@
-package com.franklinharper.jpmc.nycschools.ui.main
+package com.franklinharper.jpmc.nycschools.feature.detail
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.franklinharper.jpmc.nycschools.HighSchoolWithSatScores
-import com.franklinharper.jpmc.nycschools.NycOpenDataRepository
+import com.franklinharper.jpmc.nycschools.data.NycOpenDataRepository
+import com.franklinharper.jpmc.nycschools.data.domain.HighSchoolWithSatScores
+import com.franklinharper.jpmc.nycschools.common.ErrorType
 import com.laimiux.lce.UCE
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -31,10 +32,10 @@ import javax.inject.Inject
 // In a real app I'd implement a "loading content error" type within the app.
 // But to save time I'll just pull in a library and clean up the application
 // level code using a typealias.
-typealias HighSchoolWithSatScoresResult = UCE<List<HighSchoolWithSatScores>, TypeOfError>
+typealias HighSchoolWithSatScoresResult = UCE<HighSchoolWithSatScores, ErrorType>
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
+class DetailViewModel @Inject constructor(
     private val repository: NycOpenDataRepository
 ) : ViewModel() {
 
@@ -42,27 +43,27 @@ class MainViewModel @Inject constructor(
     private val loadingState = UCE.loading()
 
     // Hack: I'm NOT even trying to figure out what the real cause of the error is.
-    private val errorState = UCE.error(TypeOfError.OTHER)
+    private val errorState = UCE.error(ErrorType.OTHER)
 
-    private fun contents(schoolsWithSatScores: List<HighSchoolWithSatScores>) =
+    private fun contents(schoolsWithSatScores: HighSchoolWithSatScores) =
         UCE.content(schoolsWithSatScores)
 
     //
     // This is the beginning of the "application level" code.
     //
-    private val mutableSchoolResults = MutableLiveData<HighSchoolWithSatScoresResult>()
-    val schoolResults: LiveData<HighSchoolWithSatScoresResult>
-        get() = mutableSchoolResults
+    private val mutableSchoolResult = MutableLiveData<HighSchoolWithSatScoresResult>()
+    val schoolResult: LiveData<HighSchoolWithSatScoresResult>
+        get() = mutableSchoolResult
 
-    fun loadData() {
-        mutableSchoolResults.value = loadingState
+    fun loadData(dbn: String) {
+        mutableSchoolResult.value = loadingState
         viewModelScope.launch {
             runCatching {
-                repository.loadSchoolsWithSatScores(viewModelScope)
+                repository.loadSchoolWithSatFromDb(dbn)
             }.onFailure {
-                mutableSchoolResults.postValue(errorState)
+                mutableSchoolResult.postValue(errorState)
             }.onSuccess { schoolsWithSatScores ->
-                mutableSchoolResults.postValue(contents(schoolsWithSatScores))
+                mutableSchoolResult.postValue(contents(schoolsWithSatScores))
             }
         }
     }

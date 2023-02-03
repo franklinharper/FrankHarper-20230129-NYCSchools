@@ -13,25 +13,26 @@
         android:textAppearance="@android:style/TextAppearance.Material.Title"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        android:paddingBottom="16dp"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/websiteLabel"
+        android:id="@+id/satTakerPercentageLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/website"
+        android:text="@string/sat_taker_percentage"
         android:textAppearance="@android:style/TextAppearance.Material.Body1"
         android:textColor="@android:color/darker_gray"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/schoolName" />
 
     <TextView
-        android:id="@+id/websiteValue"
+        android:id="@+id/satTakerPercentageValue"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textAppearance="@android:style/TextAppearance.Material.Body1"
-        app:layout_constraintStart_toEndOf="@id/websiteLabel"
-        app:layout_constraintTop_toTopOf="@id/websiteLabel" />
+        app:layout_constraintStart_toEndOf="@id/satTakerPercentageLabel"
+        app:layout_constraintTop_toTopOf="@id/satTakerPercentageLabel" />
 
     <TextView
         android:id="@+id/mathLabel"
@@ -41,7 +42,7 @@
         android:textAppearance="@android:style/TextAppearance.Material.Body2"
         android:textColor="@android:color/darker_gray"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/websiteLabel" />
+        app:layout_constraintTop_toBottomOf="@id/satTakerPercentageLabel" />
 
     <TextView
         android:id="@+id/mathValue"

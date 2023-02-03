@@ -1,14 +1,16 @@
-package com.franklinharper.jpmc.nycschools.ui.main
+package com.franklinharper.jpmc.nycschools.feature.main
 
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.franklinharper.jpmc.nycschools.R
 import com.franklinharper.jpmc.nycschools.databinding.FragmentMainBinding
+import com.franklinharper.jpmc.nycschools.data.domain.HighSchoolWithSatScores
 import com.laimiux.lce.fold
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -16,10 +18,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainFragment : Fragment(R.layout.fragment_main) {
 
     private val viewModel: MainViewModel by viewModels()
-
-    companion object {
-        fun newInstance() = MainFragment()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,12 +28,21 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         super.onViewCreated(view, savedInstanceState)
 
         val binding = FragmentMainBinding.bind(view)
-        val schoolAdapter = SchoolAdapter()
+        val schoolAdapter = MainAdapter(
+            onItemClick = { highSchoolWithSatScores: HighSchoolWithSatScores ->
+                findNavController()
+                    .navigate(
+                        MainFragmentDirections.mainFragmentToDetailFragment(
+                            highSchoolWithSatScores.dbn
+                        )
+                    )
+            }
+        )
         binding.list.apply {
             layoutManager = LinearLayoutManager(
                 context,
                 LinearLayoutManager.VERTICAL,
-                /* reverseLayout */ false
+                /* reverseLayout = */ false
             )
             addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             adapter = schoolAdapter

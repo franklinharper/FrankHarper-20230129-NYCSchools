@@ -2,16 +2,17 @@ package com.franklinharper.jpmc.nycschools
 
 import com.google.gson.annotations.SerializedName
 
-data class HighSchool(
+data class ApiHighSchool(
     // Use  @SerializedName to prevent creating bugs when a Kotlin property is renamed.
-    @SerializedName("dbn") val dbn: String,
-    @SerializedName("school_name") val schoolName: String,
-    @SerializedName("start_time") val startTime: String,
-    @SerializedName("subway") val subway: String,
-    @SerializedName("total_students") val totalStudents: String,
-    @SerializedName("transfer") val transfer: String,
-    @SerializedName("website") val website: String,
-    @SerializedName("zip") val zip: String,
+    // All properties are made nullable because we don't trust the data coming from the REST API.
+    @SerializedName("dbn") val dbn: String?,
+    @SerializedName("school_name") val schoolName: String?,
+    @SerializedName("start_time") val startTime: String?,
+    @SerializedName("subway") val subway: String?,
+    @SerializedName("total_students") val totalStudents: String?,
+    @SerializedName("transfer") val transfer: String?,
+    @SerializedName("website") val website: String?,
+    @SerializedName("zip") val zipCode: String?,
 
     // The properties below are not currently used in the app.
     //

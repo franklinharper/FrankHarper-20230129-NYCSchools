@@ -8,6 +8,15 @@ plugins {
     // DI: Hilt
     id 'kotlin-kapt'
     id 'com.google.dagger.hilt.android'
+
+    // Safe Args Kotlin version
+    //
+    // If we need to support Java then use this instead
+    //   id 'androidx.navigation.safeargs'
+    id 'androidx.navigation.safeargs.kotlin'
+
+    // Use Parcelize to generate Parcelable boiler plate code.
+    id "kotlin-parcelize"
 }
 
 sqldelight {
@@ -52,6 +61,7 @@ android {
 }
 
 dependencies {
+    def nav_version = "2.5.3"
 
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.0'
@@ -75,6 +85,10 @@ dependencies {
     // DI: Hilt
     implementation "com.google.dagger:hilt-android:2.44"
     kapt "com.google.dagger:hilt-compiler:2.44"
+
+    // Navigation
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
     // Test dependencies
     testImplementation 'junit:junit:4.13.2'

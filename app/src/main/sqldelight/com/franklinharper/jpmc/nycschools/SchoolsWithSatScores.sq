@@ -1,30 +1,38 @@
 -- src/main/sqldelight/com/example/sqldelight/hockey/data/Player.sq
 
-CREATE TABLE highSchoolWithSatScores (
+CREATE TABLE highSchool (
   dbn TEXT PRIMARY KEY NOT NULL,
   name TEXT NOT NULL,
-  startTime TEXT,
-  subway TEXT NOT NULL,
-  totalStudents TEXT NOT NULL,
-  zipCode TEXT NOT NULL,
-  website TEXT NOT NULL,
-  mathSatAverageScore TEXT,
-  writingSatAverageScore TEXT,
-  readingSatAverageScore TEXT,
-  satTestTakerCount TEXT
+  startTime TEXT, -- Can be NULL
+  subway TEXT, -- Can be NULL
+  totalStudents INTEGER, -- Can be NULL
+  zipCode TEXT, -- Can be NULL
+  website TEXT, -- Can be NULL
+  mathSatAverageScore INTEGER, -- Can be NULL
+  writingSatAverageScore INTEGER, -- Can be NULL
+  readingSatAverageScore INTEGER, -- Can be NULL
+  satTestTakerCount INTEGER -- Can be NULL
 );
 
-CREATE INDEX schoolName ON highSchoolWithSatScores(name);
+CREATE INDEX schoolName ON highSchool(name);
 
 selectAllSchools:
-    SELECT
-        dbn, name, startTime, subway, totalStudents, zipCode, website, mathSatAverageScore,
-         writingSatAverageScore, readingSatAverageScore, satTestTakerCount
-    FROM highSchoolWithSatScores;
+    -- In classic SQL usage we should avoid "SELECT *" because adding or removing columns could
+    -- break application level code.
+    --
+    -- But in thise case we can safely use "SELECT *"
+    -- because SqlDelight generates type safe code for us.
+    SELECT *
+    FROM highSchool;
+
+getSchoolByDbn:
+    SELECT *
+    FROM highSchool
+    WHERE dbn = :dbn;
 
 insert:
 -- The primary key value "id" is set automatically by SQLite
-INSERT INTO highSchoolWithSatScores(
+INSERT INTO highSchool(
     dbn,
     name,
     startTime,

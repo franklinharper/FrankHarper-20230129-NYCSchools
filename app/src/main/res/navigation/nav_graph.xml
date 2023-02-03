@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph.xml"
+    app:startDestination="@+id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.franklinharper.jpmc.nycschools.feature.main.MainFragment"
+        android:label="@string/app_name">
+        <action
+            android:id="@+id/mainFragmentToDetailFragment"
+            app:destination="@id/detailFragment">
+            <argument
+                android:name="dbn"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/detailFragment"
+        android:name="com.franklinharper.jpmc.nycschools.feature.detail.DetailFragment"
+        android:label="@string/app_name">
+        <argument
+            android:name="dbn"
+            app:argType="string" />
+    </fragment>
+
+</navigation>

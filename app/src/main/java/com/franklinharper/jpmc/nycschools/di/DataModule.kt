@@ -4,7 +4,7 @@ import android.content.Context
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.franklinharper.jpmc.nycschools.Database
-import com.franklinharper.jpmc.nycschools.ui.main.NycOpenDataService
+import com.franklinharper.jpmc.nycschools.data.restapi.NycOpenDataService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,8 +15,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
-// In this "toy" app we can instantiate these dependencies for the entire
-// App lifecycle. In a large scale app we would want to use finer grained scoping.
+// In this "toy" app we can instantiate all of the dependencies for the entire
+// App lifecycle. But in a large scale app we would want to use finer grained scoping.
 @InstallIn(SingletonComponent::class)
 object DataModule {
 
@@ -33,7 +33,7 @@ object DataModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): Database {
-        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, context, name = "test.db")
+        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, context, name = "nyc-schools.db")
         return Database(driver)
     }
 }
