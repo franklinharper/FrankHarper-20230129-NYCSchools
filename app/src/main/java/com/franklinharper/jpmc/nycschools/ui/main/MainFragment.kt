@@ -2,12 +2,14 @@ package com.franklinharper.jpmc.nycschools.ui.main
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.franklinharper.jpmc.nycschools.R
 import com.franklinharper.jpmc.nycschools.databinding.FragmentMainBinding
+import com.laimiux.lce.fold
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -33,13 +35,31 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             layoutManager = LinearLayoutManager(
                 context,
                 LinearLayoutManager.VERTICAL,
-               /* reverseLayout */ false
+                /* reverseLayout */ false
             )
             addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             adapter = schoolAdapter
         }
-        viewModel.schoolData.observe(viewLifecycleOwner) { highSchoolsWithSatScoresList ->
-            schoolAdapter.submitList(highSchoolsWithSatScoresList)
+        viewModel.schoolResults.observe(viewLifecycleOwner) { event ->
+            event.fold(
+                onLoading = {
+                    binding.spinner.isVisible = true
+                    binding.errorMessage.isVisible = false
+                    binding.list.isVisible = false
+                },
+                onError = {
+                    binding.spinner.isVisible = false
+                    binding.errorMessage.isVisible = true
+                    binding.list.isVisible = false
+                },
+                onContent = { highSchoolsWithSatScoresList ->
+                    // The School data set is static; so I will skip implementing an "empty View"
+                    binding.spinner.isVisible = false
+                    binding.errorMessage.isVisible = false
+                    binding.list.isVisible = true
+                    schoolAdapter.submitList(highSchoolsWithSatScoresList)
+                }
+            )
         }
     }
 }

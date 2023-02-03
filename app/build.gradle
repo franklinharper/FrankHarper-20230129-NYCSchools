@@ -67,6 +67,8 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
+    implementation("com.laimiux.lce:lce:0.3.1")
+
     // DB: SqlDelight
     implementation "app.cash.sqldelight:android-driver:2.0.0-alpha05"
 

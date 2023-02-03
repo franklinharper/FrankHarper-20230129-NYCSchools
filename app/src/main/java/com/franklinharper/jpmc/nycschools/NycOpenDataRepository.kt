@@ -3,6 +3,7 @@ package com.franklinharper.jpmc.nycschools
 import com.franklinharper.jpmc.nycschools.ui.main.NycOpenDataService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -27,11 +28,12 @@ class NycOpenDataRepository @Inject constructor(
         //
         // If the data source was being updated we could sync the local DB with the data source.
         //
-        // Some examples of syncing strategies:
+        // Some ideas for syncing strategies:
         //
         // * every time the app launches
         // * once a year after NYC publishes an annual update
         // * when the sync hasn't been performed within the last X days.
+        // * use a light weight network call to check if the data has been updated since the last sync.
         //
 
         val dataFromDb = queries.selectAllSchools().executeAsList()
@@ -66,6 +68,7 @@ class NycOpenDataRepository @Inject constructor(
     }
 
     private suspend fun loadFromApi(parentScope: CoroutineScope): List<HighSchoolWithSatScores> {
+        //
         // The getSchoolList() API call returns a significant amount of data.
         //
         // Instead of cancelling the requests when the parentScope is no longer
@@ -83,7 +86,6 @@ class NycOpenDataRepository @Inject constructor(
         // Execute the networking calls asynchronously.
         val schoolListDeferred = parentScope.async {
             Timber.d("schoolList: start")
-            // TODO error handling
             service.getSchoolList().body().also {
                 Timber.d("schoolList: finish")
             }
@@ -95,7 +97,7 @@ class NycOpenDataRepository @Inject constructor(
             }
         }
 
-        // Execute the API requests and then merge the results.
+        // Execute the API requests in parallel and then merge the results.
         val schoolList = schoolListDeferred.await() ?: emptyList()
         val satScoreList = satScoreListDeferred.await() ?: emptyList()
         val satScoreMap = satScoreList.associateBy { satScore ->

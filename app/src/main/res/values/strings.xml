@@ -4,4 +4,5 @@
     <string name="website">Website: </string>
     <string name="writing_sat_average">Writing SAT Average:</string>
     <string name="reading_sat_average">Reading SAT Average:</string>
+    <string name="something_went_wrong">Something went wrong</string>
 </resources>
