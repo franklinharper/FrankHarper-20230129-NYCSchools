@@ -13,9 +13,13 @@ class NycOpenDataRepository @Inject constructor(
 
     private val queries = database.schoolsWithSatScoresQueries
 
+    /**
+     * @param parentScope
+     * @return A List of schools with SAT scores; or null if an error occurred.
+     */
     suspend fun loadSchoolsWithSatScores(
         parentScope: CoroutineScope,
-    ): List<HighSchoolWithSatScores>? {
+    ): List<HighSchoolWithSatScores> {
 
         // The data provided by NYC has not been updated since September 10, 2018.
         // For the purposes of this simple app we'll assume that the data is static
@@ -41,13 +45,9 @@ class NycOpenDataRepository @Inject constructor(
         return dataFromApi
     }
 
-    private fun saveDataToDb(dataFromApi: List<HighSchoolWithSatScores>?) {
-        // TODO Handle this more elegantly by having an empty list instead of null.
-        if (dataFromApi == null) return
-
+    private fun saveDataToDb(dataFromApi: List<HighSchoolWithSatScores>) {
         queries.transaction {
             dataFromApi.forEach { school: HighSchoolWithSatScores ->
-                Timber.d("Inserting $school")
                 queries.insert(
                     dbn = school.dbn,
                     name = school.name,
@@ -65,7 +65,7 @@ class NycOpenDataRepository @Inject constructor(
         }
     }
 
-    private suspend fun loadFromApi(parentScope: CoroutineScope): List<HighSchoolWithSatScores>? {
+    private suspend fun loadFromApi(parentScope: CoroutineScope): List<HighSchoolWithSatScores> {
         // The getSchoolList() API call returns a significant amount of data.
         //
         // Instead of cancelling the requests when the parentScope is no longer
@@ -95,13 +95,14 @@ class NycOpenDataRepository @Inject constructor(
             }
         }
 
-        // Execute the API requests and merge the results.
-        val schoolList = schoolListDeferred.await()
-        val satScoreMap = satScoreListDeferred.await()?.associateBy { satScore ->
+        // Execute the API requests and then merge the results.
+        val schoolList = schoolListDeferred.await() ?: emptyList()
+        val satScoreList = satScoreListDeferred.await() ?: emptyList()
+        val satScoreMap = satScoreList.associateBy { satScore ->
             satScore.dbn
         }
-        return schoolList?.map { highSchool ->
-            val schoolsSatScore = satScoreMap?.get(highSchool.dbn)
+        return schoolList.map { highSchool ->
+            val schoolsSatScore = satScoreMap[highSchool.dbn]
             HighSchoolWithSatScores(
                 dbn = highSchool.dbn,
                 name = highSchool.schoolName,

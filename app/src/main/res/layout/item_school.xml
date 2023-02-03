@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="16dp"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/schoolName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="@android:style/TextAppearance.Material.Title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/websiteLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/website"
+        android:textAppearance="@android:style/TextAppearance.Material.Body1"
+        android:textColor="@android:color/darker_gray"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/schoolName" />
+
+    <TextView
+        android:id="@+id/websiteValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="@android:style/TextAppearance.Material.Body1"
+        app:layout_constraintStart_toEndOf="@id/websiteLabel"
+        app:layout_constraintTop_toTopOf="@id/websiteLabel" />
+
+    <TextView
+        android:id="@+id/mathLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/math_sat_average"
+        android:textAppearance="@android:style/TextAppearance.Material.Body2"
+        android:textColor="@android:color/darker_gray"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/websiteLabel" />
+
+    <TextView
+        android:id="@+id/mathValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@android:style/TextAppearance.Material.Body2"
+        app:layout_constraintStart_toEndOf="@id/mathLabel"
+        app:layout_constraintTop_toTopOf="@id/mathLabel" />
+
+    <TextView
+        android:id="@+id/writingLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/writing_sat_average"
+        android:textAppearance="@android:style/TextAppearance.Material.Body2"
+        android:textColor="@android:color/darker_gray"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mathLabel" />
+
+    <TextView
+        android:id="@+id/writingValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@android:style/TextAppearance.Material.Body2"
+        app:layout_constraintStart_toEndOf="@id/writingLabel"
+        app:layout_constraintTop_toTopOf="@id/writingLabel" />
+
+    <TextView
+        android:id="@+id/readingLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/reading_sat_average"
+        android:textAppearance="@android:style/TextAppearance.Material.Body2"
+        android:textColor="@android:color/darker_gray"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/writingLabel" />
+
+    <TextView
+        android:id="@+id/readingValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@android:style/TextAppearance.Material.Body2"
+        app:layout_constraintStart_toEndOf="@id/readingLabel"
+        app:layout_constraintTop_toTopOf="@id/readingLabel" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
