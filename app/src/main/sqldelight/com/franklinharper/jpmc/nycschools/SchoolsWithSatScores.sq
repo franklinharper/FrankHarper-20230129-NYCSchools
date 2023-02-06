@@ -19,7 +19,7 @@ CREATE INDEX schoolNameIndex ON highSchool(name);
 CREATE INDEX satTestTakerPercentageIndex ON highSchool(satTestTakerPercentage);
 
 getAllSchools:
-    -- In classic SQL usage we should avoid "SELECT *" because adding or removing columns could
+    -- In classic SQL usage we would avoid "SELECT *" because adding or removing columns could
     -- break application level code.
     --
     -- But in thise case we can safely use "SELECT *"
