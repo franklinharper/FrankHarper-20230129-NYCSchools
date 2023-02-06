@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">FrankHarper-20230129-NYCSchools</string>
-    <string name="math_sat_average">Math SAT Average:</string>
     <string name="website">Website: </string>
-    <string name="sat_taker_percentage">SAT takers:</string>
+    <string name="sat_taker_percentage">% of SAT takers:</string>
+    <string name="math_sat_average">Math SAT Average:</string>
     <string name="writing_sat_average">Writing SAT Average:</string>
     <string name="reading_sat_average">Reading SAT Average:</string>
     <string name="something_went_wrong">Something went wrong</string>

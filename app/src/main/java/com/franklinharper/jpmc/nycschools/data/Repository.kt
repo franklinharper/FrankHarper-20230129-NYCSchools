@@ -1,8 +1,8 @@
 package com.franklinharper.jpmc.nycschools.data
 
+import com.franklinharper.jpmc.nycschools.ApiHighSchool
 import com.franklinharper.jpmc.nycschools.Database
 import com.franklinharper.jpmc.nycschools.HighSchool
-import com.franklinharper.jpmc.nycschools.ApiHighSchool
 import com.franklinharper.jpmc.nycschools.data.domain.HighSchoolWithSatScores
 import com.franklinharper.jpmc.nycschools.data.domain.SatScores
 import com.franklinharper.jpmc.nycschools.data.restapi.ApiSatScore
@@ -11,8 +11,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.math.roundToLong
 
-class NycOpenDataRepository @Inject constructor(
+class Repository @Inject constructor(
     private val service: NycOpenDataService,
     database: Database,
 ) {
@@ -41,7 +42,7 @@ class NycOpenDataRepository @Inject constructor(
         // * use a light weight network call to check if the data has been updated since the last sync.
         //
 
-        val dataFromDb = queries.selectAllSchools().executeAsList()
+        val dataFromDb = queries.getAllSchools().executeAsList()
         if (dataFromDb.isNotEmpty()) {
             Timber.d("Returning data from DB")
             return dataFromDb.map {
@@ -53,7 +54,6 @@ class NycOpenDataRepository @Inject constructor(
         Timber.d("Returning data from API")
         return dataFromApi
     }
-
 
     private fun saveDataToDb(validatedData: List<HighSchoolWithSatScores>) {
         queries.transaction {
@@ -69,7 +69,8 @@ class NycOpenDataRepository @Inject constructor(
                     mathSatAverageScore = school.mathSatAverageScore,
                     writingSatAverageScore = school.writingSatAverageScore,
                     readingSatAverageScore = school.readingSatAverageScore,
-                    satTestTakerCount = school.satTestTakerCount,
+                    satTestTakerCount = school.countOfSatTakers,
+                    satTestTakerPercentage = school.percentageOfSatTakers,
                 )
             }
         }
@@ -110,6 +111,11 @@ class NycOpenDataRepository @Inject constructor(
         val satScoreList = satScoreListDeferred.await() ?: emptyList()
 
         // TODO use threading so that the post processing below is NOT done on the main thread.
+        val validatedSatScoreMap = validateApiSatDataAndLogAnomalies(satScoreList)
+        return validateApiSchoolsAndLogAnomalies(schoolList, validatedSatScoreMap)
+    }
+
+    private fun validateApiSatDataAndLogAnomalies(satScoreList: List<ApiSatScore>): Map<String, SatScores> {
         val validatedSatScoreMap = satScoreList.mapNotNull { apiSatScore: ApiSatScore ->
             val validatedTestTakerCount = apiSatScore.testTakerCount?.toLongOrNull()
             val validatedAvgReadingScore = apiSatScore.readingAvgScore?.toLongOrNull()
@@ -140,10 +146,7 @@ class NycOpenDataRepository @Inject constructor(
             // will be in the Map.
             satScore.dbn
         }
-
-        val validatedSchoolList = validateApiSchoolsAndLogAnomalies(schoolList, validatedSatScoreMap)
-
-        return validatedSchoolList
+        return validatedSatScoreMap
     }
 
     private fun validateApiSchoolsAndLogAnomalies(
@@ -165,6 +168,14 @@ class NycOpenDataRepository @Inject constructor(
                 Timber.w("Received invalid school data from REST API: $apiSchool, $validatedSatScores")
                 null
             } else {
+                val validatedSatTakerPercentage = if (validatedSatScores == null) {
+                    null
+                } else {
+                    val ratio =
+                        validatedSatScores.satTestTakerCount.toDouble() / validatedTotalStudents.toDouble()
+                    (ratio * 100).roundToLong()
+                }
+
                 HighSchoolWithSatScores(
                     dbn = apiSchool.dbn,
                     name = apiSchool.schoolName,
@@ -173,7 +184,8 @@ class NycOpenDataRepository @Inject constructor(
                     zipCode = apiSchool.zipCode,
                     website = apiSchool.website,
                     totalStudents = validatedTotalStudents,
-                    satTestTakerCount = validatedSatScores?.satTestTakerCount,
+                    countOfSatTakers = validatedSatScores?.satTestTakerCount,
+                    percentageOfSatTakers = validatedSatTakerPercentage,
                     mathSatAverageScore = validatedSatScores?.mathSatAverageScore,
                     writingSatAverageScore = validatedSatScores?.writingSatAverageScore,
                     readingSatAverageScore = validatedSatScores?.readingSatAverageScore,
@@ -183,7 +195,7 @@ class NycOpenDataRepository @Inject constructor(
         return validatedSchoolList
     }
 
-    // Copy the data from the DB object over to the application object.
+    // Copy the data from the DB object over to the domain object.
     fun loadSchoolWithSatFromDb(dbn: String): HighSchoolWithSatScores {
         val highSchoolFromDb = queries.getSchoolByDbn(dbn).executeAsOne()
         return fromDbToHighSchoolWithSatScores(highSchoolFromDb)
@@ -201,7 +213,8 @@ class NycOpenDataRepository @Inject constructor(
             mathSatAverageScore = highSchoolFromDb.mathSatAverageScore,
             writingSatAverageScore = highSchoolFromDb.writingSatAverageScore,
             readingSatAverageScore = highSchoolFromDb.readingSatAverageScore,
-            satTestTakerCount = highSchoolFromDb.satTestTakerCount,
+            countOfSatTakers = highSchoolFromDb.satTestTakerCount,
+            percentageOfSatTakers = highSchoolFromDb.satTestTakerPercentage
         )
     }
 }

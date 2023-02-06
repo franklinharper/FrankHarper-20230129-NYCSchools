@@ -12,19 +12,12 @@ data class HighSchoolWithSatScores(
     val subway: String?,
     val zipCode: String?,
     val website: String?,
+    // Using Longs because that's what corresponds to an INTEGER in SqlLite.
+    // For details see Db schema in SchoolsWithSatScores.sq (path -> app/src/main/sqldelight/...).
     val totalStudents: Long?,
-    val satTestTakerCount: Long?,
     val mathSatAverageScore: Long?,
     val writingSatAverageScore: Long?,
     val readingSatAverageScore: Long?,
+    val countOfSatTakers: Long?,
+    val percentageOfSatTakers: Long?,
 )
-{
-    fun satTakerPercentage(): String {
-        return if (satTestTakerCount == null || totalStudents == null || totalStudents == 0L ) {
-            NA
-        } else {
-            val percentage = (satTestTakerCount.toDouble() / totalStudents.toDouble() * 100).roundToInt()
-            return percentage.toString() + "%"
-        }
-    }
-}

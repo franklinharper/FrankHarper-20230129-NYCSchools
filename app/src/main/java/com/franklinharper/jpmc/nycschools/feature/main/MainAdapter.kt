@@ -68,7 +68,7 @@ class MainAdapter(private val onItemClick: (
 
         fun bind(school: HighSchoolWithSatScores) {
             binding.schoolName.text = school.name
-            binding.satTakerPercentageValue.text = school.satTakerPercentage()
+            binding.satTakerPercentageValue.text = school.percentageOfSatTakers?.toString() ?: NA
             binding.mathValue.text = school.mathSatAverageScore?.toString() ?: NA
             binding.writingValue.text = school.writingSatAverageScore?.toString() ?: NA
             binding.readingValue.text = school.readingSatAverageScore?.toString() ?: NA

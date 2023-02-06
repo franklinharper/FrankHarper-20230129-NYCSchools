@@ -46,7 +46,7 @@ class DetailFragment : Fragment(R.layout.fragment_detail) {
                     school.subway
                     school.writingSatAverageScore
                     school.totalStudents
-                    school.satTestTakerCount
+                    school.countOfSatTakers
                     binding.websiteValue.text = school.website
                     binding.mathValue.text = school.mathSatAverageScore?.toString() ?: NA
                     binding.writingValue.text = school.writingSatAverageScore?.toString() ?: NA

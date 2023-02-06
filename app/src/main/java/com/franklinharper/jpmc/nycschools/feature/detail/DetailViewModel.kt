@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.franklinharper.jpmc.nycschools.data.NycOpenDataRepository
+import com.franklinharper.jpmc.nycschools.data.Repository
 import com.franklinharper.jpmc.nycschools.data.domain.HighSchoolWithSatScores
 import com.franklinharper.jpmc.nycschools.common.ErrorType
 import com.laimiux.lce.UCE
@@ -36,7 +36,7 @@ typealias HighSchoolWithSatScoresResult = UCE<HighSchoolWithSatScores, ErrorType
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
-    private val repository: NycOpenDataRepository
+    private val repository: Repository
 ) : ViewModel() {
 
     // More hacky "plumbing" code.

@@ -11,19 +11,22 @@ CREATE TABLE highSchool (
   mathSatAverageScore INTEGER, -- Can be NULL
   writingSatAverageScore INTEGER, -- Can be NULL
   readingSatAverageScore INTEGER, -- Can be NULL
-  satTestTakerCount INTEGER -- Can be NULL
+  satTestTakerCount INTEGER, -- Can be NULL
+  satTestTakerPercentage INTEGER -- Can be NULL
 );
 
-CREATE INDEX schoolName ON highSchool(name);
+CREATE INDEX schoolNameIndex ON highSchool(name);
+CREATE INDEX satTestTakerPercentageIndex ON highSchool(satTestTakerPercentage);
 
-selectAllSchools:
+getAllSchools:
     -- In classic SQL usage we should avoid "SELECT *" because adding or removing columns could
     -- break application level code.
     --
     -- But in thise case we can safely use "SELECT *"
     -- because SqlDelight generates type safe code for us.
     SELECT *
-    FROM highSchool;
+    FROM highSchool
+    ORDER BY satTestTakerPercentage DESC;
 
 getSchoolByDbn:
     SELECT *
@@ -43,9 +46,11 @@ INSERT INTO highSchool(
     mathSatAverageScore,
     writingSatAverageScore,
     readingSatAverageScore,
-    satTestTakerCount
+    satTestTakerCount,
+    satTestTakerPercentage
 )
 VALUES (
+?,
 ?,
 ?,
 ?,
