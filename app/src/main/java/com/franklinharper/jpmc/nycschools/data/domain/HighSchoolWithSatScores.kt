@@ -1,8 +1,6 @@
 package com.franklinharper.jpmc.nycschools.data.domain
 
-import com.franklinharper.jpmc.nycschools.common.NA
-import kotlin.String
-import kotlin.math.roundToInt
+import com.franklinharper.jpmc.nycschools.HighSchool
 
 // This represents internal validated data.
 data class HighSchoolWithSatScores(
@@ -21,3 +19,19 @@ data class HighSchoolWithSatScores(
     val countOfSatTakers: Long?,
     val percentageOfSatTakers: Long?,
 )
+
+fun HighSchool.toHighSchoolWithSatScores(): HighSchoolWithSatScores =
+    HighSchoolWithSatScores(
+        dbn = dbn,
+        name = name,
+        startTime = startTime,
+        subway = subway,
+        totalStudents = totalStudents,
+        zipCode = zipCode,
+        website = website,
+        mathSatAverageScore = mathSatAverageScore,
+        writingSatAverageScore = writingSatAverageScore,
+        readingSatAverageScore = readingSatAverageScore,
+        countOfSatTakers = satTestTakerCount,
+        percentageOfSatTakers = satTestTakerPercentage
+    )

@@ -2,9 +2,9 @@ package com.franklinharper.jpmc.nycschools.data
 
 import com.franklinharper.jpmc.nycschools.ApiHighSchool
 import com.franklinharper.jpmc.nycschools.Database
-import com.franklinharper.jpmc.nycschools.HighSchool
 import com.franklinharper.jpmc.nycschools.data.domain.HighSchoolWithSatScores
 import com.franklinharper.jpmc.nycschools.data.domain.SatScores
+import com.franklinharper.jpmc.nycschools.data.domain.toHighSchoolWithSatScores
 import com.franklinharper.jpmc.nycschools.data.restapi.ApiSatScore
 import com.franklinharper.jpmc.nycschools.data.restapi.NycOpenDataService
 import kotlinx.coroutines.CoroutineScope
@@ -45,78 +45,26 @@ class Repository @Inject constructor(
         val dataFromDb = queries.getAllSchools().executeAsList()
         if (dataFromDb.isNotEmpty()) {
             Timber.d("Returning data from DB")
-            return dataFromDb.map {
-                fromDbToHighSchoolWithSatScores(highSchoolFromDb = it)
+            return dataFromDb.map { dbHighSchool ->
+                dbHighSchool.toHighSchoolWithSatScores()
             }
         }
-        val dataFromApi = loadFromApi(parentScope)
-        saveDataToDb(dataFromApi)
-        Timber.d("Returning data from API")
-        return dataFromApi
-    }
-
-    private fun saveDataToDb(validatedData: List<HighSchoolWithSatScores>) {
-        queries.transaction {
-            validatedData.forEach { school: HighSchoolWithSatScores ->
-                queries.insert(
-                    dbn = school.dbn,
-                    name = school.name,
-                    startTime = school.startTime,
-                    subway = school.subway,
-                    totalStudents = school.totalStudents,
-                    zipCode = school.zipCode,
-                    website = school.website,
-                    mathSatAverageScore = school.mathSatAverageScore,
-                    writingSatAverageScore = school.writingSatAverageScore,
-                    readingSatAverageScore = school.readingSatAverageScore,
-                    satTestTakerCount = school.countOfSatTakers,
-                    satTestTakerPercentage = school.percentageOfSatTakers,
-                )
-            }
-        }
-    }
-
-    private suspend fun loadFromApi(parentScope: CoroutineScope): List<HighSchoolWithSatScores> {
-        //
-        // The getSchoolList() API call returns a significant amount of data.
-        //
-        // Instead of cancelling the requests when the parentScope is no longer
-        // active; we'll always let the API requests finish and store the data in the DB
-        // for future usage.
-        //
-        // The benefit is that when the user relaunches the app; the data will be loaded from the DB.
-        // This is faster and more reliable than making networking calls.
-        //
-        // Passing in the parentScope enables revisiting this decision
-        // without making a change to this function's signature.
-        //
-        // ---------------------------------------------------------------------------------
-        //
-        // Execute the networking calls asynchronously.
-        val schoolListDeferred = parentScope.async {
-            Timber.d("schoolList: start")
-            service.getSchoolList().body().also { highSchoolListFromApi: List<ApiHighSchool>? ->
-                Timber.d("schoolList finish count: ${highSchoolListFromApi?.size}")
-            }
-        }
-        val satScoreListDeferred = parentScope.async {
-            Timber.d("satList: start")
-            service.getSatScoreList().body().also { satScoreListFromApi: List<ApiSatScore>? ->
-                Timber.d("satScoreList finish count: ${satScoreListFromApi?.size}")
-            }
-        }
-
-        // Execute the API requests in parallel and then merge the results.
-        val schoolList = schoolListDeferred.await() ?: emptyList()
-        val satScoreList = satScoreListDeferred.await() ?: emptyList()
-
+        Timber.d("Loading data from API")
+        val (apiHighSchoolList, apiSatScoreList) = loadFromApi(parentScope)
         // TODO use threading so that the post processing below is NOT done on the main thread.
-        val validatedSatScoreMap = validateApiSatDataAndLogAnomalies(satScoreList)
-        return validateApiSchoolsAndLogAnomalies(schoolList, validatedSatScoreMap)
+        val validatedSchoolsWithSatScores = validateApiDataAndLogAnomalies(
+            apiHighSchoolList,
+            apiSatScoreList,
+        )
+        saveDataToDb(validatedSchoolsWithSatScores)
+        return validatedSchoolsWithSatScores
     }
 
-    private fun validateApiSatDataAndLogAnomalies(satScoreList: List<ApiSatScore>): Map<String, SatScores> {
-        val validatedSatScoreMap = satScoreList.mapNotNull { apiSatScore: ApiSatScore ->
+    private fun validateApiDataAndLogAnomalies(
+        apiHighSchoolList: List<ApiHighSchool>,
+        apiSatScoreList: List<ApiSatScore>,
+    ): List<HighSchoolWithSatScores> {
+        val validatedSatScoreMap = apiSatScoreList.mapNotNull { apiSatScore: ApiSatScore ->
             val validatedTestTakerCount = apiSatScore.testTakerCount?.toLongOrNull()
             val validatedAvgReadingScore = apiSatScore.readingAvgScore?.toLongOrNull()
             val validatedAvgMathScore = apiSatScore.mathAvgScore?.toLongOrNull()
@@ -146,14 +94,8 @@ class Repository @Inject constructor(
             // will be in the Map.
             satScore.dbn
         }
-        return validatedSatScoreMap
-    }
 
-    private fun validateApiSchoolsAndLogAnomalies(
-        schoolList: List<ApiHighSchool>,
-        validatedSatScoreMap: Map<String, SatScores>
-    ): List<HighSchoolWithSatScores> {
-        val validatedSchoolList = schoolList.mapNotNull { apiSchool: ApiHighSchool ->
+        val validatedSchoolList = apiHighSchoolList.mapNotNull { apiSchool: ApiHighSchool ->
             val validatedTotalStudents = apiSchool.totalStudents?.toLongOrNull()
             val validatedSatScores = validatedSatScoreMap[apiSchool.dbn]
             if (
@@ -175,7 +117,6 @@ class Repository @Inject constructor(
                         validatedSatScores.satTestTakerCount.toDouble() / validatedTotalStudents.toDouble()
                     (ratio * 100).roundToLong()
                 }
-
                 HighSchoolWithSatScores(
                     dbn = apiSchool.dbn,
                     name = apiSchool.schoolName,
@@ -192,29 +133,71 @@ class Repository @Inject constructor(
                 )
             }
         }
+
         return validatedSchoolList
     }
 
-    // Copy the data from the DB object over to the domain object.
-    fun loadSchoolWithSatFromDb(dbn: String): HighSchoolWithSatScores {
-        val highSchoolFromDb = queries.getSchoolByDbn(dbn).executeAsOne()
-        return fromDbToHighSchoolWithSatScores(highSchoolFromDb)
+    private fun saveDataToDb(validatedData: List<HighSchoolWithSatScores>) {
+        queries.transaction {
+            validatedData.forEach { school: HighSchoolWithSatScores ->
+                queries.insert(
+                    dbn = school.dbn,
+                    name = school.name,
+                    startTime = school.startTime,
+                    subway = school.subway,
+                    totalStudents = school.totalStudents,
+                    zipCode = school.zipCode,
+                    website = school.website,
+                    mathSatAverageScore = school.mathSatAverageScore,
+                    writingSatAverageScore = school.writingSatAverageScore,
+                    readingSatAverageScore = school.readingSatAverageScore,
+                    satTestTakerCount = school.countOfSatTakers,
+                    satTestTakerPercentage = school.percentageOfSatTakers,
+                )
+            }
+        }
     }
 
-    private fun fromDbToHighSchoolWithSatScores(highSchoolFromDb: HighSchool): HighSchoolWithSatScores {
-        return HighSchoolWithSatScores(
-            dbn = highSchoolFromDb.dbn,
-            name = highSchoolFromDb.name,
-            startTime = highSchoolFromDb.startTime,
-            subway = highSchoolFromDb.subway,
-            totalStudents = highSchoolFromDb.totalStudents,
-            zipCode = highSchoolFromDb.zipCode,
-            website = highSchoolFromDb.website,
-            mathSatAverageScore = highSchoolFromDb.mathSatAverageScore,
-            writingSatAverageScore = highSchoolFromDb.writingSatAverageScore,
-            readingSatAverageScore = highSchoolFromDb.readingSatAverageScore,
-            countOfSatTakers = highSchoolFromDb.satTestTakerCount,
-            percentageOfSatTakers = highSchoolFromDb.satTestTakerPercentage
+    private suspend fun loadFromApi(parentScope: CoroutineScope): Pair<List<ApiHighSchool>, List<ApiSatScore>> {
+        //
+        // The getSchoolList() API call returns a significant amount of data.
+        //
+        // Instead of cancelling the requests when the parentScope is no longer
+        // active; we'll always let the API requests finish and store the data in the DB
+        // for future usage.
+        //
+        // The benefit is that when the user relaunches the app; the data will be loaded from the DB.
+        // This is faster and more reliable than making networking calls.
+        //
+        // Passing in the parentScope enables revisiting this decision
+        // without making a change to this function's signature.
+        //
+        // ---------------------------------------------------------------------------------
+        //
+        // Execute the networking calls asynchronously.
+        val apiSchoolListDeferred = parentScope.async {
+            Timber.d("schoolList: start")
+            service.getSchoolList().body().also { highSchoolListFromApi: List<ApiHighSchool>? ->
+                Timber.d("schoolList finish count: ${highSchoolListFromApi?.size}")
+            }
+        }
+        val apiSatScoreListDeferred = parentScope.async {
+            Timber.d("satList: start")
+            service.getSatScoreList().body().also { satScoreListFromApi: List<ApiSatScore>? ->
+                Timber.d("satScoreList finish count: ${satScoreListFromApi?.size}")
+            }
+        }
+
+        // Execute the API requests in parallel and return the results.
+        return Pair(
+            apiSchoolListDeferred.await() ?: emptyList(),
+            apiSatScoreListDeferred.await() ?: emptyList(),
         )
     }
+
+    fun loadSchoolWithSatFromDb(dbn: String): HighSchoolWithSatScores =
+        queries
+            .getSchoolByDbn(dbn)
+            .executeAsOne()
+            .toHighSchoolWithSatScores()
 }
