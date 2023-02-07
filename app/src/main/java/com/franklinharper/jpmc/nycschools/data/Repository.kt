@@ -47,11 +47,11 @@ class Repository @Inject constructor(
 
         val highSchoolWithSatScoresList =
             withContext(dispatchers.io) {
-                // Using the io dispatcher makes this function "main-safe"
-                val exisitingDbData = getHighSchoolsWithSatFromDb()
-                if (exisitingDbData.isNotEmpty()) {
-                    Timber.d("Returning data from DB")
-                    return@withContext exisitingDbData
+                getHighSchoolsWithSatFromDb().let { existingDbData ->
+                    if(existingDbData.isNotEmpty()) {
+                        Timber.d("Returning data from DB")
+                        return@withContext existingDbData
+                    }
                 }
                 Timber.d("Starting parallel data loading from API")
                 val (apiHighSchoolList, apiSatScoreList) = loadFromApi(parentScope)
