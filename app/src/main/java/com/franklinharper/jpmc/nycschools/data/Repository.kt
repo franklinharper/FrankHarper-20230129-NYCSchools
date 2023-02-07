@@ -47,8 +47,9 @@ class Repository @Inject constructor(
 
         val highSchoolWithSatScoresList =
             withContext(dispatchers.io) {
-                getHighSchoolsWithSatFromDb().let { existingDbData ->
-                    if(existingDbData.isNotEmpty()) {
+                with(getHighSchoolsWithSatFromDb()) {
+                    val existingDbData = this
+                    if (existingDbData.isNotEmpty()) {
                         Timber.d("Returning data from DB")
                         return@withContext existingDbData
                     }
