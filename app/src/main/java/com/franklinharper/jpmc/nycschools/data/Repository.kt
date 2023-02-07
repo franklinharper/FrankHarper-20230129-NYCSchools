@@ -2,6 +2,7 @@ package com.franklinharper.jpmc.nycschools.data
 
 import com.franklinharper.jpmc.nycschools.ApiHighSchool
 import com.franklinharper.jpmc.nycschools.Database
+import com.franklinharper.jpmc.nycschools.coroutine.CoroutineDispatchers
 import com.franklinharper.jpmc.nycschools.data.domain.HighSchoolWithSatScores
 import com.franklinharper.jpmc.nycschools.data.domain.SatScores
 import com.franklinharper.jpmc.nycschools.data.domain.toHighSchoolWithSatScores
@@ -9,13 +10,15 @@ import com.franklinharper.jpmc.nycschools.data.restapi.ApiSatScore
 import com.franklinharper.jpmc.nycschools.data.restapi.NycOpenDataService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.math.roundToLong
 
 class Repository @Inject constructor(
+    private val dispatchers: CoroutineDispatchers,
     private val service: NycOpenDataService,
-    database: Database,
+    private val database: Database,
 ) {
 
     private val queries = database.schoolsWithSatScoresQueries
@@ -42,23 +45,46 @@ class Repository @Inject constructor(
         // * use a light weight network call to check if the data has been updated since the last sync.
         //
 
-        val dataFromDb = queries.getAllSchools().executeAsList()
-        if (dataFromDb.isNotEmpty()) {
-            Timber.d("Returning data from DB")
-            return dataFromDb.map { dbHighSchool ->
+        val highSchoolWithSatScoresList =
+            withContext(dispatchers.io) {
+                // Using the io dispatcher makes this function "main-safe"
+                val exisitingDbData = getHighSchoolsWithSatFromDb()
+                if (exisitingDbData.isNotEmpty()) {
+                    Timber.d("Returning data from DB")
+                    return@withContext exisitingDbData
+                }
+                Timber.d("Starting parallel data loading from API")
+                val (apiHighSchoolList, apiSatScoreList) = loadFromApi(parentScope)
+                // The data from the API has been loaded.
+                //
+                // TODO launch a coroutine in an externalScope to ensure that the
+                //       data is always parsed and stored in the DB.
+                //
+                //       For details see
+                //          https://medium.com/androiddevelopers/coroutines-patterns-for-work-that-shouldnt-be-cancelled-e26c40f142ad
+                //
+                val validatedSchoolsWithSatScores = validateApiDataAndLogAnomalies(
+                    apiHighSchoolList,
+                    apiSatScoreList,
+                )
+
+                val res = saveDataToDb(validatedSchoolsWithSatScores)
+
+                // Return data from the DB so that the list is correctly sorted.
+                return@withContext getHighSchoolsWithSatFromDb()
+            }
+
+        Timber.d("returning highSchoolWithSatScores. size: ${highSchoolWithSatScoresList.size}")
+        return getHighSchoolsWithSatFromDb()
+    }
+
+    private fun getHighSchoolsWithSatFromDb() =
+        queries
+            .getAllSchools()
+            .executeAsList()
+            .map { dbHighSchool ->
                 dbHighSchool.toHighSchoolWithSatScores()
             }
-        }
-        Timber.d("Loading data from API")
-        val (apiHighSchoolList, apiSatScoreList) = loadFromApi(parentScope)
-        // TODO use threading so that the post processing below is NOT done on the main thread.
-        val validatedSchoolsWithSatScores = validateApiDataAndLogAnomalies(
-            apiHighSchoolList,
-            apiSatScoreList,
-        )
-        saveDataToDb(validatedSchoolsWithSatScores)
-        return validatedSchoolsWithSatScores
-    }
 
     private fun validateApiDataAndLogAnomalies(
         apiHighSchoolList: List<ApiHighSchool>,
@@ -137,8 +163,8 @@ class Repository @Inject constructor(
         return validatedSchoolList
     }
 
-    private fun saveDataToDb(validatedData: List<HighSchoolWithSatScores>) {
-        queries.transaction {
+    private fun saveDataToDb(validatedData: List<HighSchoolWithSatScores>): Boolean {
+        val res = queries.transactionWithResult {
             validatedData.forEach { school: HighSchoolWithSatScores ->
                 queries.insert(
                     dbn = school.dbn,
@@ -155,7 +181,9 @@ class Repository @Inject constructor(
                     satTestTakerPercentage = school.percentageOfSatTakers,
                 )
             }
+            true
         }
+        return res
     }
 
     private suspend fun loadFromApi(parentScope: CoroutineScope): Pair<List<ApiHighSchool>, List<ApiSatScore>> {
