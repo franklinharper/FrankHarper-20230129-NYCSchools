@@ -12,11 +12,10 @@ being around more academically oriented students increases the student's chances
 
 In a real app there would be more than one way to sort and filter.
 
-Some options are:
+Some options for improving the UX are:
 
 * filter by distance from a certain location
 * filter by estimated travel time from a certain location
-* sort by percentage of students that take the SAT (only sort that is currently implemented)
 * sort by average SAT score (math+reading+writing)
 * sort by math SAT score
 * sort by average reading+writing SAT scores
@@ -46,7 +45,7 @@ Requirements:
 
             loosely typed data                         Strongly typed and validated data
             (e.g. Kotlin String?)                      + Log entries for the data anomalies                            
-REST API ---------------------------> Data validation -------------------------------------->  App usage
+REST API ---------------------------> Data validation --------------------------------------> Domain data
 
 * Use Retrofit and Gson to get the School data and convert the JSON into loosely typed Data classes
 * Create a SQLite DB and use it to store a local copy of the validated data
@@ -89,12 +88,12 @@ Decision → The data set is not large; so the Repository can return a List of a
 ## ViewModels
 
 Decision → LiveData for exposing data streams
-The LiveData API is simple (simplistic?). For more advanced use cases it could be worth it to use Kotlin Flows. Although it could be argued that not exposing Flows to the MVVM View is an advantage because it reduces the temptation to add logic into the View.
+The LiveData API is simple (simplistic?). For more advanced use cases it could be worth it to use Kotlin Flows. Although it could be argued that NOT exposing Flows to the MVVM View is an advantage because it reduces the temptation to add logic into the View.
 
 ## MVVM View implementation
 
-Decision → Use 1 Activity with multiple Fragments.
-Decision → Use classic Android Views; because that's what I'm familiar with.
+* Decision → Use one Activity with multiple Fragments.
+* Decision → Use classic Android Views; because that's what I'm familiar with.
 
 ## Screens
 
@@ -113,7 +112,4 @@ SKIP - display empty view
 
 ### School Details
 
-Same info as in the List view with contact info.
-
-TODO - centralize the UCE hacks that are in both ViewModels
-TODO - add tests
+Display schools webisite, location, contact info, etc.
