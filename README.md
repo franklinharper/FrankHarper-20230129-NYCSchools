@@ -8,7 +8,7 @@ To accomplish this the list of high schools is sorted by the
 **percentage of students** that take the SAT. The hypothesis is that
 being around more academically oriented students increases the student's chances of doing well on the SAT.
 
-## More sorting and filtering option.
+## More sorting and filtering options
 
 In a real app there would be more than one way to sort and filter.
 
