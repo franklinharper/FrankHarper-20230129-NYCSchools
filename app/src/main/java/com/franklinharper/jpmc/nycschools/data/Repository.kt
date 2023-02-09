@@ -7,7 +7,7 @@ import com.franklinharper.jpmc.nycschools.data.domain.HighSchoolWithSatScores
 import com.franklinharper.jpmc.nycschools.data.domain.SatScores
 import com.franklinharper.jpmc.nycschools.data.domain.toHighSchoolWithSatScores
 import com.franklinharper.jpmc.nycschools.data.restapi.ApiSatScore
-import com.franklinharper.jpmc.nycschools.data.restapi.NycOpenDataService
+import com.franklinharper.jpmc.nycschools.data.restapi.ApiService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -17,11 +17,17 @@ import kotlin.math.roundToLong
 
 class Repository @Inject constructor(
     private val dispatchers: CoroutineDispatchers,
-    private val service: NycOpenDataService,
+    private val service: ApiService,
     private val database: Database,
 ) {
 
     private val queries = database.schoolsWithSatScoresQueries
+
+    fun loadSchoolWithSatScores(dbn: String): HighSchoolWithSatScores =
+        queries
+            .getSchoolByDbn(dbn)
+            .executeAsOne()
+            .toHighSchoolWithSatScores()
 
     /**
      * @param parentScope
@@ -224,9 +230,4 @@ class Repository @Inject constructor(
         )
     }
 
-    fun loadSchoolWithSatFromDb(dbn: String): HighSchoolWithSatScores =
-        queries
-            .getSchoolByDbn(dbn)
-            .executeAsOne()
-            .toHighSchoolWithSatScores()
 }

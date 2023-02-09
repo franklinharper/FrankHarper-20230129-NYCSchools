@@ -4,7 +4,7 @@ import android.content.Context
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.franklinharper.jpmc.nycschools.Database
-import com.franklinharper.jpmc.nycschools.data.restapi.NycOpenDataService
+import com.franklinharper.jpmc.nycschools.data.restapi.ApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,13 +22,13 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideNycOpenDataService(): NycOpenDataService =
+    fun provideNycOpenDataService(): ApiService =
         Retrofit
             .Builder()
             .baseUrl("https://data.cityofnewyork.us/resource/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(NycOpenDataService::class.java)
+            .create(ApiService::class.java)
 
     @Provides
     @Singleton

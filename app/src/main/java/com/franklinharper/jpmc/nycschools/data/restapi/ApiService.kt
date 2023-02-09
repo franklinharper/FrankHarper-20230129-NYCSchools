@@ -5,7 +5,7 @@ import retrofit2.Response
 import retrofit2.http.GET
 
 
-interface NycOpenDataService {
+interface ApiService {
     @GET("s3k6-pzi2.json")
     suspend fun getSchoolList(): Response<List<ApiHighSchool>>
     @GET("f9bf-2cp4.json")

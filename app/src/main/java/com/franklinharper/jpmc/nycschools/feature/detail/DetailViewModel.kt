@@ -59,7 +59,7 @@ class DetailViewModel @Inject constructor(
         mutableSchoolResult.value = loadingState
         viewModelScope.launch {
             runCatching {
-                repository.loadSchoolWithSatFromDb(dbn)
+                repository.loadSchoolWithSatScores(dbn)
             }.onFailure {
                 mutableSchoolResult.postValue(errorState)
             }.onSuccess { schoolsWithSatScores ->

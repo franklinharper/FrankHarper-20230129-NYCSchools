@@ -61,7 +61,9 @@ android {
 }
 
 dependencies {
-    def nav_version = "2.5.3"
+    def navVersion = "2.5.3"
+    def coroutinesVersion = "1.6.4"
+
 
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.0'
@@ -73,7 +75,7 @@ dependencies {
 
     implementation 'com.jakewharton.timber:timber:5.0.1'
 
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
@@ -87,11 +89,17 @@ dependencies {
     kapt "com.google.dagger:hilt-compiler:2.44"
 
     // Navigation
-    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
-    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-fragment-ktx:$navVersion"
+    implementation "androidx.navigation:navigation-ui-ktx:$navVersion"
 
     // Test dependencies
     testImplementation 'junit:junit:4.13.2'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion"
+    // This is the JVM SQLite driver. Using it - instead of the Android driver - enables testing the
+    // database without needing an Android emulator or physical device.
+    testImplementation "app.cash.sqldelight:sqlite-driver:2.0.0-alpha05"
+
+    // Android Test dependencies
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }

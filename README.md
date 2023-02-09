@@ -95,6 +95,33 @@ The LiveData API is simple (simplistic?). For more advanced use cases it could b
 * Decision → Use one Activity with multiple Fragments.
 * Decision → Use classic Android Views; because that's what I'm familiar with.
 
+## Tests
+
+### Unit tests
+
+Write a unit test for the Repository that uses
+
+* a fake REST API
+* the **real** DB
+
+When it makes sense I prefer to use real dependencies; even in unit tests. In this case I decided to use the real DB because running the test will still be fast and not flaky; despite using the real DB.
+
+Using the real REST API would be slow and flaky → I decided to use a fake API.
+
+Using real or fake dependencies makes it easier to test the requirements without testing the implementation details.
+Because the test uses the real DB this is a hybrid between a unit test and an integration test.
+In this case I prefer to use a real DB because
+
+Bonus points if I can also run this test with the real REST API; which would make it an integration test
+
+### Integration tests
+
+TBD
+
+### End to end tests
+
+TBD
+
 ## Screens
 
 ### School List
@@ -112,4 +139,4 @@ SKIP - display empty view
 
 ### School Details
 
-Display schools webisite, location, contact info, etc.
+Display schools website, location, contact info, etc.
