@@ -16,7 +16,7 @@ import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
 
-internal class RepositoryTest {
+internal class RepositoryUnitTest {
 
     private val testDispatchers = object : CoroutineDispatchers {
         override val io = Dispatchers.IO
@@ -83,7 +83,6 @@ internal class RepositoryTest {
                     dbn = "dbn1",
                     name = "school1",
                     startTime = null,
-                    subway = null,
                     zipCode = null,
                     website = null,
                     totalStudents = 100,

@@ -4,7 +4,6 @@ CREATE TABLE highSchool (
   dbn TEXT PRIMARY KEY NOT NULL,
   name TEXT NOT NULL,
   startTime TEXT, -- Can be NULL
-  subway TEXT, -- Can be NULL
   totalStudents INTEGER, -- Can be NULL
   zipCode TEXT, -- Can be NULL
   website TEXT, -- Can be NULL
@@ -39,7 +38,6 @@ INSERT INTO highSchool(
     dbn,
     name,
     startTime,
-    subway,
     totalStudents,
     zipCode,
     website,
@@ -50,7 +48,6 @@ INSERT INTO highSchool(
     satTestTakerPercentage
 )
 VALUES (
-?,
 ?,
 ?,
 ?,

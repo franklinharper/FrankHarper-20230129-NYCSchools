@@ -7,7 +7,6 @@ data class HighSchoolWithSatScores(
     val dbn: String,
     val name: String,
     val startTime: String?,
-    val subway: String?,
     val zipCode: String?,
     val website: String?,
     // Using Longs because that's what corresponds to an INTEGER in SqlLite.
@@ -25,7 +24,6 @@ fun HighSchool.toHighSchoolWithSatScores(): HighSchoolWithSatScores =
         dbn = dbn,
         name = name,
         startTime = startTime,
-        subway = subway,
         totalStudents = totalStudents,
         zipCode = zipCode,
         website = website,

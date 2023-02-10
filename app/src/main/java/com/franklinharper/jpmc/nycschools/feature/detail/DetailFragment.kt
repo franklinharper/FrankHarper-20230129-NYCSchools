@@ -38,15 +38,7 @@ class DetailFragment : Fragment(R.layout.fragment_detail) {
                     binding.spinner.isVisible = false
                     binding.errorMessage.isVisible = false
                     binding.details.isVisible = true
-
-
                     binding.schoolName.text = school.name
-
-                    school.startTime
-                    school.subway
-                    school.writingSatAverageScore
-                    school.totalStudents
-                    school.countOfSatTakers
                     binding.websiteValue.text = school.website
                     binding.mathValue.text = school.mathSatAverageScore?.toString() ?: NA
                     binding.writingValue.text = school.writingSatAverageScore?.toString() ?: NA

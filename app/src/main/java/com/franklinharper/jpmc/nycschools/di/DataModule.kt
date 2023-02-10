@@ -7,6 +7,7 @@ import com.franklinharper.jpmc.nycschools.Database
 import com.franklinharper.jpmc.nycschools.data.restapi.ApiService
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
@@ -35,5 +36,14 @@ object DataModule {
     fun provideDatabase(@ApplicationContext context: Context): Database {
         val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, context, name = "nyc-schools.db")
         return Database(driver)
+    }
+
+
+    // EntryPoints are used to provide real dependencies to test classes.
+    // These dependencies are for End to End tests.
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface DataEntryPoint {
+        fun getapiService() : ApiService
     }
 }
