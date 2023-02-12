@@ -4,8 +4,11 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.franklinharper.jpmc.nycschools.Database
 import com.franklinharper.jpmc.nycschools.coroutine.CoroutineDispatchers
 import com.franklinharper.jpmc.nycschools.data.domain.HighSchoolWithSatScores
+import com.franklinharper.jpmc.nycschools.data.restapi.ApiService
 import com.franklinharper.jpmc.nycschools.di.DataModule
+import dagger.hilt.EntryPoint
 import dagger.hilt.EntryPoints
+import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
@@ -40,11 +43,19 @@ internal class RepositoryEndToEndTest {
         override val io = Dispatchers.IO
     }
 
+    // EntryPoints are used to provide real dependencies to test classes.
+    // These dependencies are for End to End tests.
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface DataEntryPoint {
+        fun getApiService() : ApiService
+    }
+
     // This is the real apiService used in the app; it makes networking calls.
     private val apiService = EntryPoints.get(
         SingletonComponent::class,
-        DataModule.DataEntryPoint::class.java
-    ).getapiService()
+        DataEntryPoint::class.java
+    ).getApiService()
 
     // These dependencies are reinitialized before each test.
     private lateinit var database: Database
@@ -71,7 +82,7 @@ internal class RepositoryEndToEndTest {
     // * the domain data is sorted in the correct order
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `test loadSchoolsWithSatScores() when Rest Api responds without errors`() = runTest {
+    fun `loadSchoolsWithSatScores() returns expected data`() = runTest {
         // Arrange
 
         // No extra setup is required for this test.

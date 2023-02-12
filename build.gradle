@@ -6,7 +6,13 @@ plugins {
     id 'org.jetbrains.kotlin.android' version '1.7.22' apply false
 
     // DI with Hilt
-    id 'com.google.dagger.hilt.android' version '2.44' apply false
+    id 'com.google.dagger.hilt.android' version '2.45' apply false
+    // The line above is equivalent to:
+    //     dependencies {
+    //         // other plugins...
+    //         classpath 'com.google.dagger:hilt-android-gradle-plugin:x.yy'
+    //     }
+    //     apply plugin: 'com.google.dagger.hilt.android'
 
     // Safe Args
     id 'androidx.navigation.safeargs' version '2.5.3' apply false

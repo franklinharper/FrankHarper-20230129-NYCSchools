@@ -75,7 +75,7 @@ class Repository @Inject constructor(
                     apiSatScoreList,
                 )
 
-                val res = saveDataToDb(validatedSchoolsWithSatScores)
+                saveDataToDb(validatedSchoolsWithSatScores)
 
                 // Return data from the DB so that the list is correctly sorted.
                 return@withContext getHighSchoolsWithSatFromDb()

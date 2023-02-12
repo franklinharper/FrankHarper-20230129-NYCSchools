@@ -38,12 +38,4 @@ object DataModule {
         return Database(driver)
     }
 
-
-    // EntryPoints are used to provide real dependencies to test classes.
-    // These dependencies are for End to End tests.
-    @EntryPoint
-    @InstallIn(SingletonComponent::class)
-    interface DataEntryPoint {
-        fun getapiService() : ApiService
-    }
 }

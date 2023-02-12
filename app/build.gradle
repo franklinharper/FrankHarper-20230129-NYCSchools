@@ -63,8 +63,11 @@ android {
 dependencies {
     def navVersion = "2.5.3"
     def coroutinesVersion = "1.6.4"
+    def hiltVersion = "2.45"
 
-
+    // *****************
+    // App dependencies
+    // *****************
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.0'
     implementation 'com.google.android.material:material:1.8.0'
@@ -85,21 +88,35 @@ dependencies {
     implementation "app.cash.sqldelight:android-driver:2.0.0-alpha05"
 
     // DI: Hilt
-    implementation "com.google.dagger:hilt-android:2.44"
-    kapt "com.google.dagger:hilt-compiler:2.44"
+    implementation "com.google.dagger:hilt-android:$hiltVersion"
+    // We're using Kotlin so we need to use "kapt" instead of "annotationProcessor"
+    kapt "com.google.dagger:hilt-compiler:$hiltVersion"
+
 
     // Navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$navVersion"
     implementation "androidx.navigation:navigation-ui-ktx:$navVersion"
 
+    // *****************
     // Test dependencies
+    // *****************
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion"
+
     // This is the JVM SQLite driver. Using it - instead of the Android driver - enables testing the
     // database without needing an Android emulator or physical device.
     testImplementation "app.cash.sqldelight:sqlite-driver:2.0.0-alpha05"
 
+    // Used for running end to end tests.
+    testImplementation 'org.robolectric:robolectric:4.9'
+
+    // For local unit tests
+//    testImplementation "com.google.dagger:hilt-android-testing:$hiltVersion"
+//    testAnnotationProcessor "com.google.dagger:hilt-compiler:$hiltVersion"
+
+    // **************************
     // Android Test dependencies
+    // **************************
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
